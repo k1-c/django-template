@@ -8,5 +8,3 @@ COPY requirements.txt /usr/src/app/requirements.txt
 
 RUN pip install -U pip
 RUN pip install -r requirements.txt
-
-#COPY . /usr/src/app
