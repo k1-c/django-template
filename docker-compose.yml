@@ -17,5 +17,5 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - PGPASSWORD=password
-      - POSTGRESS_DB=development
+      - POSTGRES_DB=development
       - DATABASE_HOST=localhost
