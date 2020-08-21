@@ -1,8 +1,15 @@
-# django template
+# Django Template
+> Super Cool Template by [shunk-py](https://github.com/shunk-py)
 
-## Requirements
-- [Installing Poetry](https://python-poetry.org/docs/)
-- Python ^3.8
+## Features
+- Docker Services for Django Application
+  - Django 3+ (with Django REST framework 3.1+)
+  - PostgreSQL
+  - Mail Catcher
+  - Celery + Celery Beat + Redis for Periodic Task
+  - Nginx
+  - Let's Encrypt SSL by https-portal
+- Makefile for Service Utilities
+- Formatting by Black
+- Github Actions for Running Test / Deploy
 
-## Installation
-WIP

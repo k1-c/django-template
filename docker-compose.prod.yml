@@ -1,0 +1,39 @@
+version: "3"
+
+services:
+  app:
+    command: gunicorn core.wsgi -b 0.0.0.0:8000
+    volumes:
+      - ./app:/usr/src/app
+      - static-store:/usr/src/app/static
+      - media-store:/usr/src/app/media
+  nginx:
+    image: nginx:latest
+    tty: true
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docker/nginx/conf:/etc/nginx/conf.d
+      - ./docker/nginx/uwsgi_params:/etc/nginx/uwsgi_params
+      - static-store:/usr/src/app/static
+      - media-store:/usr/src/app/media
+    depends_on:
+      - app
+  https-portal:
+    # see https://github.com/SteveLTN/https-portal to configure
+    restart: unless-stopped
+    image: steveltn/https-portal:1
+    environment:
+      DOMAINS: 'example.com -> http://nginx:8080'
+      # STAGE: production
+    ports:
+      - 80:80
+      - 443:443
+    links:
+      - nginx
+    depends_on:
+      - nginx
+
+volumes:
+  static-store:
+  media-store:

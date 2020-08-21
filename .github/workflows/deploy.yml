@@ -1,0 +1,39 @@
+name: Deploy to EC2
+# masterにpushされた時にjobを実行する
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy
+      # 保存したシークレットたちを環境変数に設定
+      env:
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        EC2_USER: ${{ secrets.EC2_USER }}
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+      run: |
+        echo "$SECRET_KEY" > secret_key && chmod 600 secret_key
+        ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} -i secret_key "cd ~/tdpv2/backend && git pull origin master && make production"
+    # デプロイ成功時
+    - name: Slack Notification on Success
+      if: success()
+      uses: rtCamp/action-slack-notify@v2.0.2
+      env:
+        SLACK_USERNAME: GitHubActions
+        SLACK_ICON_EMOJI: ':github:'
+        SLACK_TITLE: Deploy Success
+        SLACK_COLOR: good
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+    # デプロイ失敗時
+    - name: Slack Notification on Failure
+      uses: rtCamp/action-slack-notify@v2.0.2
+      if: failure()
+      env:
+        SLACK_USERNAME: GitHubActions
+        SLACK_ICON_EMOJI: ':github:'
+        SLACK_TITLE: Deploy Failure
+        SLACK_COLOR: danger
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

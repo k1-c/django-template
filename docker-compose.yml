@@ -1,0 +1,75 @@
+version: "3"
+
+services:
+  app:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    environment:
+      - MAIL_PORT=25
+      - MAIL_HOST=mail
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./app:/usr/src/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - mail
+  db:
+    restart: unless-stopped
+    image: postgres:10-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - PGPASSWORD=password
+      - POSTGRES_DB=development
+      - DATABASE_HOST=localhost
+    volumes:
+      - db-store:/var/lib/postgresql/data
+  mail:
+    restart: unless-stopped
+    image: kamiazya/mailcatcher
+    ports:
+      - "1080:1080"
+      - "25:25"
+  redis:
+    image: "redis:alpine"
+  celery:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    command: celery -A core worker -l info
+    volumes:
+      - ./app:/usr/src/app
+    environment:
+      - DB_HOST=db
+      - DB_NAME=development
+      - DB_USER=postgres
+      - DB_PASS=password
+    depends_on:
+      - app
+      - db
+      - redis
+  celery-beat:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    command: celery -A core beat -l INFO --pidfile=
+    volumes:
+      - ./app:/usr/src/app
+    environment:
+      - DB_HOST=db
+      - DB_NAME=development
+      - DB_USER=postgres
+      - DB_PASS=password
+    depends_on:
+      - app
+      - db
+      - redis
+
+volumes:
+  db-store:

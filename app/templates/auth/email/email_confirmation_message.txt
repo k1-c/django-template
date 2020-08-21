@@ -1,0 +1,10 @@
+{% load account %}
+{% user_display user as user_display %}
+{% load i18n %}
+{% autoescape off %}
+
+***** 本メールは自動送信メールとなっております。 *****
+
+メールアドレスを確認する： {{ activate_url }}
+
+{% endautoescape %}
